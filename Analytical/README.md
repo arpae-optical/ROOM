@@ -8,3 +8,6 @@ Thin walled structures: available in hexagonal and rectangular fences.
 
 Multi-material structured surfaces:
 Embedded cavities: same as single material.
+
+Todo: Streamline functions to call view factor functions and area functions, rather than have them all singular functions. 
+Todo: Convert to julia (.jl) for portability/parallelizability. 
