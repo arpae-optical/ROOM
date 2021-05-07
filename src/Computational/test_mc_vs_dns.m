@@ -6,18 +6,18 @@
 
 % First, let's pick a single geometry and calculate the exact view factors:
 L_H = sqrt(3); 
+tic
+FWW = FhexWW(L_H); % Exact solution for view factors wall-to-walls of hex
+Tex = toc;
 
-[FWW,tex] = FhexWW(L_H); % Exact solution for view factors wall-to-walls of hex
-
-% FWB = (1-FWW)/2;   % Exact for wall-to-base of hex
-% FWT = FWB;         % Exact for wall-to-top
-
+%% MC Test
 NMC = [10^3,floor(10^3.5),10^4,floor(10^4.5),10^5,floor(10^5.5),10^6]; % Test points for Monte Carlo
 WMC = zeros(size(NMC));  % Numeric wall-to-wall view factor results (MC)
-% BMC = WMC;               % Numeric wall-to-base view factor results (MC)
 TMC = WMC;               % Wall time for MC view factor test
 for ii=1:length(NMC)
-    [WMC(ii),~,~,TMC(ii)]=MCTest(NMC(ii),L_H);
+    tic
+    WMC(ii)=MCTest(NMC(ii),L_H);
+    TMC(ii)=toc;
 end
 EMC = abs(WMC-FWW)/FWW;
 figure
@@ -33,11 +33,13 @@ disp(['MC Wall Time (N)^(' num2str(OTM) ')'])
 disp(['MC Error order (1/t)^(' num2str(OETM) ')'])
 
 %% DNS Test
-NDNS= [10,14,20,28,40];
+NDNS= [4,8,16,32,64];
 WDNS= zeros(size(NDNS));
 TDNS= WDNS;
 for ii=1:length(NDNS)
-    [WDNS(ii),~,~,TDNS(ii)]=DNSTest(NDNS(ii),L_H);
+    tic
+    WDNS(ii)=DNSTest(NDNS(ii),L_H);
+    TDNS(ii)=toc;
 end
 EDNS = abs(WDNS-FWW)/FWW;
 figure

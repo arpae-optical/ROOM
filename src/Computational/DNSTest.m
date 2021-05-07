@@ -11,8 +11,7 @@
 % \___/         ||___||
 %
 
-function [FWW,FWT,FWB,t]=DNSTest(N,L_H)
-tic
+function FWW=DNSTest(N,L_H)
 H   = 1;         % Height of walls
 L   = H*L_H;     % Edge-to-edge distance of walls
 s   = L/sqrt(3); % Edge length of walls
@@ -22,7 +21,4 @@ gsource = g_quad([-s/2,-L/2,-H/2],[0,0,H],[ s,0,0],N);
 gtarget = g_hextest(N,L_H);
 
 FWW     = DNS(gsource,gtarget);
-FWT     = (1-FWW)/2;
-FWB     = FWT;
-t   = toc;
 end

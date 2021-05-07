@@ -1,17 +1,20 @@
-%% MCTest.m
-% arguments: N, L/H
+%% MCHexCyl.m
+% arguments: N, L/H, D/H
 % N: number of bundles
 % L/H: edge to edge distance of hex divided by the height
+% D/H: diameter of occluding cylinder divided by the height
 % Geometry is of form:
 %   |Y             |Z
 %  ___            ___
 % / O \  _X     || O || _X
 % \___/         ||___||
 %
-function FWW=MCTest(N,L_H)
+function FWW=MCHexCyl(N,L_H,D_H)
+% tic
 H   = 1;         % Height of walls
 L   = H*L_H;     % Edge-to-edge distance of walls
 s   = L/sqrt(3); % Edge length of walls
+D2  = (H*D_H)^2; % Diameter of cylinder in middle of enclosure, squared
 
 MCX = rand(1,N); % Monte-Carlo RNG for x distribution of bundles
 MCY = ones(1,N); % "Distribution" of y locations: all at Y=-L/2
@@ -23,7 +26,7 @@ OX  = (-1/2+MCX)*s;     % Origin of bundles
 OY  = (-L/2)*MCY;       % Origin of bundles
 OZ  = (-1/2+MCZ)*H;     % Origin of bundles
 NP  = 2*pi*MCP;         % Phi of bundles
-NQ  = asin(sqrt(MCQ));   % Theta of bundles
+NQ  = asin(sqrt(MCQ));  % Theta of bundles
 NX  = sin(NQ).*cos(NP); % X direction of bundles
 NY  = cos(NQ);          % Y direction of bundles
 NZ  = sin(NQ).*sin(NP); % Z direction of bundles
@@ -40,12 +43,25 @@ IY  = OY+S.*NY;         % Y location at |Z|=H/2
 % Otherwise, if n.Z>0, intercepts top plane.
 % Otherwise, if n.Z<0, intercepts bottom plane.
 
-NW  = abs(IY)>L/2|abs(IX)>s-s/L*(abs(IY)); 
+NW  = abs(IY)>L/2|abs(IX)>s-s/L*(abs(IY));
+
+% Now, for bundles that would intercept the wall, we need to check to see
+% if they will hit the occlusion first. 
+
+NCX = NX(NW);                  % Wall bundles' x vector
+NCY = NY(NW);                  % Wall bundles' y vector
+NCM = sqrt(NCX.^2+NCY.^2);     % Norm of just x & y
+NCX = NCX./NCM;                % X vector normalized
+NCY = NCY./NCM;                % Y vector normalized
+OL2 = OX(NW).^2+OY(NW).^2;     % Distance from bundle origin to occlusion
+TC  = -OX(NW).*NCX-OY(NW).*NCY;% Distance along vector to closest approach
+d2  = OL2-TC.^2;               % Distance from occlusion to c.a.
+NOW = d2<D2/4;                 % If c.a. is closer than radius, occluded
 % NT  = ~NW&NZ>0;
 % NB  = ~NW&NZ<0;
 
-FWW = sum(NW)/N; % The view factor is the number of bundles hit divided by total
-% FWT = sum(NT)/N;
-% FWB = sum(NB)/N;
+FWW = (sum(NW)-sum(NOW))/N; % The view factor is the number of bundles hit,
+                            % minus the number occluded, divided by total
 
+% t=toc;
 end
